@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Article;
 use Illuminate\Http\Request;
 
 class ArticleController extends Controller
@@ -11,7 +12,7 @@ class ArticleController extends Controller
      */
     public function index()
     {
-        //
+        return Article::all();
     }
 
     /**
@@ -19,7 +20,13 @@ class ArticleController extends Controller
      */
     public function store(Request $request)
     {
-        //
+        $request->validate([
+            'title' => 'required|string|max:255',
+            'body' => 'required|string',
+        ]);
+
+        $article = Article::create($request->all());
+        return response()->json($article, 201); // Répondre avec le code 201 pour indiquer que la ressource a été créée
     }
 
     /**
@@ -27,7 +34,11 @@ class ArticleController extends Controller
      */
     public function show(string $id)
     {
-        //
+        $article = Article::find($id);
+        if (!$article) {
+            return response()->json(['message' => 'Article non trouvé'], 404); // Correction du message d'erreur
+        }
+        return response()->json($article);
     }
 
     /**
@@ -35,7 +46,18 @@ class ArticleController extends Controller
      */
     public function update(Request $request, string $id)
     {
-        //
+        $article = Article::find($id);
+        if (!$article) {
+            return response()->json(['message' => 'Article non trouvé'], 404); // Correction du message d'erreur
+        }
+
+        $request->validate([
+            'title' => 'required|string|max:255', // Correction de 'require' en 'required'
+            'body' => 'required|string',
+        ]);
+
+        $article->update($request->all());
+        return response()->json($article);
     }
 
     /**
@@ -43,6 +65,12 @@ class ArticleController extends Controller
      */
     public function destroy(string $id)
     {
-        //
+        $article = Article::find($id);
+        if (!$article) {
+            return response()->json(['message' => 'Article non trouvé'], 404); // Correction du message d'erreur
+        }
+
+        $article->delete();
+        return response()->json(['message' => 'Article supprimé avec succès']); // Correction du message de succès
     }
 }
